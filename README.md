@@ -1,3 +1,9 @@
+# tBtc + TornadoCash
+
+## WORK IN PROGRESS
+
+Submission for Protect Privacy Hackathon
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
