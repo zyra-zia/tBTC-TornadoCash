@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { Fragment } from 'react'
 import Web3 from 'web3';
+import Message from './Message';
 import Deposit from "./Deposit";
+import Withdraw from "./Withdraw";
+import Spinner from "./Spinner";
 import * as constants from '../config';
 
 class App extends React.Component {
@@ -8,8 +11,15 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true
+      loading: true,
+      message: {
+        text: "",
+        isError: false
+      }
     };
+
+    this.getContractForDenomination = this.getContractForDenomination.bind(this);
+    this.setMessage = this.setMessage.bind(this);
   }
 
   componentDidMount(){
@@ -31,7 +41,7 @@ class App extends React.Component {
     this.web3.eth.defaultAccount = accounts[0];
 
     this.netId = await web3.eth.net.getId();
-    this.tornadoContract = new web3.eth.Contract(this.Erc20Tornado.abi, constants.TORNADO_CONTRACT_ADDRESS);
+    this.tornadoContract = this.getContractForDenomination("0.01")
     this.tokenContract = new web3.eth.Contract(this.TBtcContract.abi, constants.TBTC_TOKEN_CONTRACT_ADDRESS);
   }
 
@@ -45,6 +55,30 @@ class App extends React.Component {
     return Promise.all([p1, p2]);
   }
 
+  getContractForDenomination(denomination){
+    let contract;
+    switch(denomination){
+      case "1":
+        contract = new this.web3.eth.Contract(this.Erc20Tornado.abi, constants.TORNADO_CONTRACT_ADDRESS_1);
+        break;
+      case "0.1":
+        contract = new this.web3.eth.Contract(this.Erc20Tornado.abi, constants.TORNADO_CONTRACT_ADDRESS_01);
+        break;
+      case "0.01":
+      default:
+        contract = new this.web3.eth.Contract(this.Erc20Tornado.abi, constants.TORNADO_CONTRACT_ADDRESS_001);
+    }
+    return contract;
+  }
+
+  setMessage(text, isError=false){
+    this.setState({
+      message: {
+        text: text,
+        isError: isError
+      }
+    });
+  }
 
   render(){
     return (
@@ -55,14 +89,24 @@ class App extends React.Component {
           </h1>
         </header>
         <main>
+            <Message text={this.state.message.text} isError={this.state.message.isError}/>
             { this.state.loading ?
-              <p>Loading...</p>
+              <Spinner/>
               :
-              <Deposit 
-                defaultAccount = {this.web3.eth.defaultAccount} 
-                tokenContract = {this.tokenContract} 
-                tornadoContract = {this.tornadoContract} 
-              />
+              <Fragment>
+                <Deposit 
+                  defaultAccount = {this.web3.eth.defaultAccount} 
+                  tokenContract = {this.tokenContract} 
+                  tornadoContract = {this.getContractForDenomination} 
+                  setMessage = {this.setMessage}
+                />
+                <Withdraw
+                  web3 = {this.web3}
+                  defaultAccount = {this.web3.eth.defaultAccount}
+                  tornadoContract = {this.getContractForDenomination} 
+                  setMessage = {this.setMessage}
+                />
+              </Fragment>
             }
         </main>
       </div>
