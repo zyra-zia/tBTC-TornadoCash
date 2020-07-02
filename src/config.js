@@ -1,12 +1,11 @@
-
-
 export const CURRENCY = "TST";
 export const TOKEN_DECIMALS = 18;
 
 export const TORNADO_CONTRACT_ABI = 'assets/contracts/Erc20Tornado.json';
 export const TBTC_TOKEN_CONTRACT_ABI = 'assets/contracts/TestStandardToken.json';
-//export const TBTC_TOKEN_CONTRACT_ABI = 'assets/contracts/ERC20.json';
 
-export const TORNADO_CONTRACT_ADDRESS = '0x56f0220452C416c76700FCc3178d1F11F89dF2c9';
+export const TORNADO_CONTRACT_ADDRESS_001 = '0x2Eb3e75219a88fBd64C2402259fb62a92D3A9d0C';
+export const TORNADO_CONTRACT_ADDRESS_01 = '0xA906EC3d804170cf945CfC7fAF8684D6f580D727';
+export const TORNADO_CONTRACT_ADDRESS_1 = '0xdC44943613Dc2c188F6b64628B8179713c29136c';
+
 export const TBTC_TOKEN_CONTRACT_ADDRESS = '0x722dd3f80bac40c951b51bdd28dd19d435762180';
-//export const TBTC_TOKEN_CONTRACT_ADDRESS = '0xcf42ea9efa9ef30bbfbc5e4ede63624d0ea1ed61';

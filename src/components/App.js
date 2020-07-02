@@ -4,6 +4,7 @@ import Message from './Message';
 import Deposit from "./Deposit";
 import Withdraw from "./Withdraw";
 import Spinner from "./Spinner";
+import ConnectButton from "./ConnectButton";
 import * as constants from '../config';
 
 class App extends React.Component {
@@ -11,7 +12,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
+      loading: false,
       message: {
         text: "",
         isError: false
@@ -20,9 +21,20 @@ class App extends React.Component {
 
     this.getContractForDenomination = this.getContractForDenomination.bind(this);
     this.setMessage = this.setMessage.bind(this);
+    this.walletConnected = this.walletConnected.bind(this);
+    this.currentAccount = this.currentAccount.bind(this);
   }
 
-  componentDidMount(){
+  async currentAccount(){
+    // Initialise default account.
+    const accounts = await this.web3.eth.getAccounts();
+    return accounts[0];
+  }
+
+  walletConnected(){
+    this.setState({
+      loading: true
+    });
     this.fetchData().then(() => {
       return this.initWeb3();
     })
@@ -36,9 +48,6 @@ class App extends React.Component {
   async initWeb3(){
     let web3 = new Web3(window.web3.currentProvider);
     this.web3 = web3;
-    // Initialise default account.
-    const accounts = await this.web3.eth.getAccounts();
-    this.web3.eth.defaultAccount = accounts[0];
 
     this.netId = await web3.eth.net.getId();
     this.tornadoContract = this.getContractForDenomination("0.01")
@@ -89,24 +98,28 @@ class App extends React.Component {
           </h1>
         </header>
         <main>
+            <ConnectButton setMessage = {this.setMessage} walletConnected = {this.walletConnected}/>
             <Message text={this.state.message.text} isError={this.state.message.isError}/>
-            { this.state.loading ?
-              <Spinner/>
-              :
-              <Fragment>
-                <Deposit 
-                  defaultAccount = {this.web3.eth.defaultAccount} 
-                  tokenContract = {this.tokenContract} 
-                  tornadoContract = {this.getContractForDenomination} 
-                  setMessage = {this.setMessage}
-                />
-                <Withdraw
-                  web3 = {this.web3}
-                  defaultAccount = {this.web3.eth.defaultAccount}
-                  tornadoContract = {this.getContractForDenomination} 
-                  setMessage = {this.setMessage}
-                />
-              </Fragment>
+            {this.web3 !== undefined &&
+              (
+                this.state.loading ?
+                <Spinner/>
+                :
+                <Fragment>
+                  <Deposit 
+                    currentAccount = {this.currentAccount} 
+                    tokenContract = {this.tokenContract} 
+                    tornadoContract = {this.getContractForDenomination} 
+                    setMessage = {this.setMessage}
+                  />
+                  <Withdraw
+                    web3 = {this.web3}
+                    currentAccount = {this.currentAccount}
+                    tornadoContract = {this.getContractForDenomination} 
+                    setMessage = {this.setMessage}
+                  />
+                </Fragment>
+              )
             }
         </main>
       </div>

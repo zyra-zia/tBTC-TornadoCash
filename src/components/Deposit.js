@@ -9,7 +9,9 @@ class Deposit extends React.Component {
     super(props);
     this.clickDeposit = this.clickDeposit.bind(this);
     this.state = {
-      working: false
+      working: false,
+      note: "",
+      showNote: false
     };
   }
   
@@ -18,18 +20,17 @@ class Deposit extends React.Component {
     const note = tUtils.toHex(deposit.preimage, 62);
     const currency = constants.CURRENCY;
     const amount = document.querySelector('input[name="amount"]:checked').value;
+    const currentAccount = await this.props.currentAccount();
 
-    const balance = await this.props.tokenContract.methods.balanceOf(this.props.defaultAccount).call();
+    const balance = await this.props.tokenContract.methods.balanceOf(currentAccount).call();
 
     const netId = 3; //because demo only works with ropsten
     const noteString = `tornado-${currency}-${amount}-${netId}-${note}`;
-    console.log(`Your note: ${noteString}`);
     
-    const senderAccount = this.props.defaultAccount;
+    const senderAccount = currentAccount;
     
     const decimals = constants.TOKEN_DECIMALS;
     const tokenAmount = tUtils.fromDecimals( {amount, decimals} );
-    console.log("token amount to deposit is " + tokenAmount);
 
      //check there is enough balance
     if (toBN(balance).lt(toBN(tokenAmount))) {
@@ -45,37 +46,58 @@ class Deposit extends React.Component {
     try {
       const allowance = await this.props.tokenContract.methods.allowance(senderAccount, tornadoContract._address).call({ from: senderAccount });
 
-      console.log('Current allowance is', allowance);
       if (toBN(allowance).lt(toBN(tokenAmount))) {
         this.props.setMessage('Approving tokens for deposit');
         await this.props.tokenContract.methods.approve(tornadoContract._address, tokenAmount).send({ from: senderAccount, gas: 1e6 });
       }
 
       this.props.setMessage('Submitting deposit transaction');
-      return tornadoContract.methods.deposit(tUtils.toHex(deposit.commitment)).send({ from: senderAccount, gas: 2e6 })
+      await tornadoContract.methods.deposit(tUtils.toHex(deposit.commitment)).send({ from: senderAccount, gas: 2e6 })
+      return noteString;
     }
     catch(error){
       this.props.setMessage("Unknown Error. Please try again", true);
-      this.setState({
-        working: false
-      });
+      this.hideSpinner();
     }
+  }
+
+  showSpinner(){
+    this.setState({
+      working: true
+    });
+  }
+
+  hideSpinner(){
+    this.setState({
+      working: false
+    });
+  }
+
+  showNote(note){
+    this.setState({
+      note: note,
+      showNote: true
+    });
+  }
+
+  hideNote(){
+    this.setState({
+      showNote: false
+    });
   }
 
   async clickDeposit(event){
     event.preventDefault();
-    this.setState({
-      working: true
-    });
+    this.hideNote();
+    this.showSpinner();
+    
     const note = await this.deposit();
     if(note !== undefined){
       this.props.setMessage("Deposit Successful");
-      console.log('Deposited note:', note);
+      this.showNote(note);
     }
-    this.setState({
-      working: false
-    });
-
+    
+    this.hideSpinner();
   }
 
   render(){
@@ -98,6 +120,12 @@ class Deposit extends React.Component {
                   <button type="submit" onClick={this.clickDeposit} >Submit</button>
                 }
             </form>
+
+            {this.state.showNote &&
+              <p>
+                {this.state.note}
+              </p>
+            }
         </section>
     );
   }

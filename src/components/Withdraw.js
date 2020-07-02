@@ -48,8 +48,8 @@ class Withdraw extends React.Component {
     const { proof, args } = await this.generateSnarkProof(deposit, recipient);
     this.props.setMessage('Sending withdrawal transaction...');
     try{
-      const tx = await this.props.tornadoContract(this.denomination).methods.withdraw(proof, ...args).send({ from: this.props.defaultAccount, gas: 1e6 });
-      console.log(`https://ropsten.etherscan.io/tx/${tx.transactionHash}`);
+      const currentAccount = await this.props.currentAccount();
+      const tx = await this.props.tornadoContract(this.denomination).methods.withdraw(proof, ...args).send({ from: currentAccount, gas: 1e6 });
       return tx.status;
     }
     catch(error){
@@ -64,7 +64,7 @@ class Withdraw extends React.Component {
     * @param deposit Deposit object
     */
     async generateMerkleProof(deposit) {
-    console.log('Getting contract state...');
+    
     const events = await this.props.tornadoContract(this.denomination).getPastEvents('Deposit', { fromBlock: 0, toBlock: 'latest' });
     const leaves = events
       .sort((a, b) => a.returnValues.leafIndex - b.returnValues.leafIndex) // Sort events in chronological order
@@ -167,9 +167,7 @@ class Withdraw extends React.Component {
       return;
     }
 
-    this.setState({
-      working: true
-    });
+    this.showSpinner();
     
     const status = await this.withdraw(note, address);
     if(status === true){
@@ -178,6 +176,16 @@ class Withdraw extends React.Component {
     else {
       this.props.setMessage("Invalid Note or The note has already been spent", true);
     }
+    this.hideSpinner();
+  }
+
+  showSpinner(){
+    this.setState({
+      working: true
+    });
+  }
+
+  hideSpinner(){
     this.setState({
       working: false
     });
