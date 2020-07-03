@@ -3,15 +3,20 @@ import { toBN } from 'web3-utils';
 import * as constants from '../config';
 import tUtils from '../TornadoUtils';
 import Spinner from './Spinner';
+import AnonymitySet from "./AnonymitySet";
 
 class Deposit extends React.Component {
   constructor(props) {
     super(props);
     this.clickDeposit = this.clickDeposit.bind(this);
+    this.denominationChange = this.denominationChange.bind(this);
+
     this.state = {
       working: false,
       note: "",
-      showNote: false
+      showNote: false,
+      denomination: "0.01",
+      currentContract: props.tornadoContract("0.01")
     };
   }
   
@@ -100,18 +105,26 @@ class Deposit extends React.Component {
     this.hideSpinner();
   }
 
+  denominationChange(){
+    const value = document.querySelector('input[name="amount"]:checked').value;
+    this.setState({
+      denomination: value,
+      currentContract: this.props.tornadoContract(value)
+    });
+  }
+
   render(){
     return (
         <section>
             <form id="depositForm">
                 <h2>Deposit TBTC</h2>
-                <input type="radio" name="amount" value="0.01" id="amount001" defaultChecked/>
+                <input type="radio" name="amount" value="0.01" id="amount001" onChange={this.denominationChange} defaultChecked/>
                 <label htmlFor="amount001">0.01</label>
 
-                <input type="radio" name="amount" value="0.1" id="amount01"/>
+                <input type="radio" name="amount" value="0.1" id="amount01" onChange={this.denominationChange}/>
                 <label htmlFor="amount01">0.1</label>
 
-                <input type="radio" name="amount" value="1" id="amount1"/>
+                <input type="radio" name="amount" value="1" id="amount1" onChange={this.denominationChange}/>
                 <label htmlFor="amount1">1</label>
 
                 { this.state.working?
@@ -120,7 +133,7 @@ class Deposit extends React.Component {
                   <button type="submit" onClick={this.clickDeposit} >Submit</button>
                 }
             </form>
-
+            <AnonymitySet currentContract={this.state.currentContract} denomination={this.state.denomination} />
             {this.state.showNote &&
               <p>
                 {this.state.note}
