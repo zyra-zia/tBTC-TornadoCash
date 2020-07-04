@@ -1,11 +1,14 @@
 import React, { Fragment } from 'react'
 import Web3 from 'web3';
-import Message from './Message';
 import Deposit from "./Deposit";
 import Withdraw from "./Withdraw";
 import Spinner from "./Spinner";
 import ConnectButton from "./ConnectButton";
 import * as constants from '../config';
+import TabPanel from "./TabPanel";
+import CustomTheme from "./CustomTheme";
+
+import {CssBaseline, Grid, AppBar, Typography, Tabs, Tab, Box, ThemeProvider} from '@material-ui/core';
 
 class App extends React.Component {
 
@@ -13,16 +16,13 @@ class App extends React.Component {
     super(props);
     this.state = {
       loading: false,
-      message: {
-        text: "",
-        isError: false
-      }
+      tabValue: 0
     };
 
     this.getContractForDenomination = this.getContractForDenomination.bind(this);
-    this.setMessage = this.setMessage.bind(this);
     this.walletConnected = this.walletConnected.bind(this);
     this.currentAccount = this.currentAccount.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   async currentAccount(){
@@ -80,49 +80,70 @@ class App extends React.Component {
     return contract;
   }
 
-  setMessage(text, isError=false){
+  a11yProps(index) {
+    return {
+      id: `simple-tab-${index}`,
+      'aria-controls': `simple-tabpanel-${index}`
+    };
+  }
+  
+  handleChange(event, newValue) {
     this.setState({
-      message: {
-        text: text,
-        isError: isError
-      }
+      tabValue: newValue
     });
   }
 
   render(){
     return (
-      <div className="App">
-        <header className="App-header">
-          <h1>
-            TBTC + Tornado Cash
-          </h1>
-        </header>
-        <main>
-            <ConnectButton setMessage = {this.setMessage} walletConnected = {this.walletConnected}/>
-            <Message text={this.state.message.text} isError={this.state.message.isError}/>
+      <ThemeProvider theme={CustomTheme}>
+      <Box>
+        <CssBaseline />
+        <AppBar position="relative" style={{padding:'20px'}}>
+          <Typography variant="h4" align="center">
+            tBtc + Tornado Cash
+          </Typography>
+          <p style={{textAlign:'center'}}>
+            Private Bitcoin transactions using tBtc and Tornado Cash
+          </p>
+          <ConnectButton setMessage = {this.setMessage} walletConnected = {this.walletConnected}/>
+        </AppBar>
+        <Grid container={true} justify="center" style={{padding: "0", margin:"0"}}>
+          <Grid item={true} xs={12} align="center" style={{padding: "0", margin:"0"}}>
             {this.web3 !== undefined &&
               (
                 this.state.loading ?
                 <Spinner/>
                 :
                 <Fragment>
-                  <Deposit 
-                    currentAccount = {this.currentAccount} 
-                    tokenContract = {this.tokenContract} 
-                    tornadoContract = {this.getContractForDenomination} 
-                    setMessage = {this.setMessage}
-                  />
-                  <Withdraw
-                    web3 = {this.web3}
-                    currentAccount = {this.currentAccount}
-                    tornadoContract = {this.getContractForDenomination} 
-                    setMessage = {this.setMessage}
-                  />
+                  <AppBar position="relative">
+                    <Tabs value={this.state.tabValue} onChange={this.handleChange} centered={true} aria-label="Deposit/Withdraw">
+                      <Tab label="Deposit" {...this.a11yProps(0)} />
+                      <Tab label="Withdraw" {...this.a11yProps(1)} />
+                    </Tabs>
+                  </AppBar>
+                  <TabPanel value={this.state.tabValue} index={0}>
+                    <Deposit 
+                      currentAccount = {this.currentAccount} 
+                      tokenContract = {this.tokenContract} 
+                      tornadoContract = {this.getContractForDenomination} 
+                      setMessage = {this.setMessage}
+                    />
+                  </TabPanel>
+                  <TabPanel value={this.state.tabValue} index={1} >
+                    <Withdraw
+                      web3 = {this.web3}
+                      currentAccount = {this.currentAccount}
+                      tornadoContract = {this.getContractForDenomination} 
+                      setMessage = {this.setMessage}
+                    />
+                  </TabPanel>
                 </Fragment>
               )
             }
-        </main>
-      </div>
+          </Grid>
+        </Grid>
+      </Box>
+      </ThemeProvider>
     );
   }
 }

@@ -1,32 +1,23 @@
 import React from 'react';
+import MuiAlert from '@material-ui/lab/Alert';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 class Message extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.visible = false;
-    }
-  
-    componentDidUpdate(){
-       this.visible = true;
-       setTimeout(()=>{
-           this.visible = false;
-           this.forceUpdate();
-       }, 10000);
-    }
-
-    componentDidMount(){
-        this.visible = true;
-    }
-
     render(){
-        const error = this.props.isError ? "error" : "";
-        const visible = this.visible ? "visible" : "hidden";
-        const classes = `${visible} ${error}`;
+        let severity = this.props.isError ? "error" : "info";
+        if(this.props.isSuccess === true){
+            severity = "success";
+        }
+        const visible = this.props.text.length > 0 ? "visible" : "hidden";
+        const classes = `${visible} ${severity}`;
         return (
-            <div id="message" className = {classes}>
-                <p>{this.props.text}</p>
-            </div>
+            <Alert className = {classes} severity={severity} style={{maxWidth: "400px"}}>
+                {this.props.text}
+            </Alert>
         );
     }
 }

@@ -1,18 +1,27 @@
-import React from 'react';
+import React, {Fragment} from 'react';
+import Message from "./Message";
 import {bigInt as snarkBigInt} from 'snarkjs';
 import tUtils from '../TornadoUtils';
 import MerkleTree from '../lib/MerkleTree';
 import buildGroth16 from 'websnark/src/groth16';
 import websnarkUtils from 'websnark/src/utils';
 import Spinner from "./Spinner";
+import { Grid, Button, TextField} from '@material-ui/core';
 
 class Withdraw extends React.Component {
   constructor(props) {
     super(props);
     this.clickWithdraw = this.clickWithdraw.bind(this);
+    this.setMessage = this.setMessage.bind(this);
+
     this.state = {
         loading: true,
-        working: false
+        working: false,
+        message: {
+          text: "",
+          isError: false,
+          isSuccess: false
+        }
     };
   }
 
@@ -41,13 +50,23 @@ class Withdraw extends React.Component {
         });
     });
   }
+  
+  setMessage(text, isError=false, isSuccess=false){
+    this.setState({
+      message: {
+        text: text,
+        isError: isError,
+        isSuccess: isSuccess
+      }
+    });
+  }
 
   async withdraw(note, recipient) {
-    const deposit = this.parseNote(note);
-    this.denomination = this.parseAmount(note);
-    const { proof, args } = await this.generateSnarkProof(deposit, recipient);
-    this.props.setMessage('Sending withdrawal transaction...');
     try{
+      const deposit = this.parseNote(note);
+      this.denomination = this.parseAmount(note);
+      const { proof, args } = await this.generateSnarkProof(deposit, recipient);
+      this.setMessage('Sending withdrawal transaction...');
       const currentAccount = await this.props.currentAccount();
       const tx = await this.props.tornadoContract(this.denomination).methods.withdraw(proof, ...args).send({ from: currentAccount, gas: 1e6 });
       return tx.status;
@@ -106,7 +125,7 @@ class Withdraw extends React.Component {
       pathIndices: path_index,
     };
   
-    this.props.setMessage('Generating SNARK proof...');
+    this.setMessage('Generating SNARK proof...');
     const proofData = await websnarkUtils.genWitnessAndProve(this.groth16, input, this.circuit, this.proving_key);
     const { proof } = websnarkUtils.toSolidityInput(proofData);
   
@@ -143,7 +162,7 @@ class Withdraw extends React.Component {
     const noteRegex = /tornado-(?<currency>\w+)-(?<amount>[\d.]+)-(?<netId>\d+)-0x(?<note>[0-9a-fA-F]{124})/g
     const match = noteRegex.exec(note);
     if(match === null){
-      this.props.setMessage("Invalid Note", true);
+      this.setMessage("Invalid Note", true);
     }
     else {
       return true;
@@ -155,7 +174,7 @@ class Withdraw extends React.Component {
       return true;
     }
     else {
-      this.props.setMessage("Invalid recipient address", true);
+      this.setMessage("Invalid recipient address", true);
     }
   }
 
@@ -171,10 +190,10 @@ class Withdraw extends React.Component {
     
     const status = await this.withdraw(note, address);
     if(status === true){
-      this.props.setMessage("Successfull withdrawal to " + address);
+      this.setMessage("Successfull withdrawal to " + address, false, true);
     }
     else {
-      this.props.setMessage("Invalid Note or The note has already been spent", true);
+      this.setMessage("Invalid Note or The note has already been spent", true);
     }
     this.hideSpinner();
   }
@@ -193,22 +212,39 @@ class Withdraw extends React.Component {
 
   render(){
     return (
-        <section>
+      <Grid container={true} justify="center" >
+        <Grid item={true} xs={12} >
             {this.state.loading?
             <Spinner />
             :
-            <form id="WithdrawForm">
-                <h2>Withdraw TBTC</h2>
-                <input type="text" placeholder="Note" name="note" id="note"/>
-                <input type="text" placeholder="Recipient Address" name="recipient" id="recipient"/>
-                {this.state.working?
-                <Spinner />
-                :
-                <button type="submit" onClick={this.clickWithdraw} >Withdraw</button>
-                }
-            </form>
+            <Fragment>
+              <Message text={this.state.message.text} isError={this.state.message.isError} isSuccess={this.state.message.isSuccess}/>
+              <form id="WithdrawForm">
+                  <Grid container={true} justify="center" direction="column">
+                    <Grid item={true} xs={12} >
+                      <TextField id="note" name="note" label="Note" placeholder="Note" style={{minWidth: "400px", margin: "10px"}} />
+                    </Grid>
+                    <Grid item={true} xs={12} >
+                      <TextField id="recipient" name="recipient" label="Recipient Address" placeholder="Recipient Address" style={{minWidth: "400px", margin: "10px"}} />
+                    </Grid>
+                    {
+                      this.state.working?
+                      <Grid item={true} xs={12} >
+                        <Spinner />
+                      </Grid>
+                      :
+                      <Grid item={true} xs={12} >
+                        <Button variant="contained" type="submit" onClick={this.clickWithdraw} style={{margin:"15px"}}>
+                           Withdraw 
+                        </Button>
+                      </Grid>
+                    }
+                  </Grid>
+              </form>
+            </Fragment>
             }
-        </section>
+        </Grid>
+      </Grid>
     );
   }
 }

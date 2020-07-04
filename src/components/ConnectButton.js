@@ -1,4 +1,6 @@
 import React from 'react';
+import Fab from '@material-ui/core/Fab';
+import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
 class ConnectButton extends React.Component {
 
@@ -28,11 +30,27 @@ class ConnectButton extends React.Component {
     }
 
     render(){
+        const styles = {
+            padding: '20px',
+            margin: '20px auto',
+            width: "fit-content"
+        };
 
+        const iconStyles = {
+            marginRight: '10px'
+        };
         return (
-            <button onClick={this.connect} className={this.state.connected?"connected":"unconnected"}>
+            <Fab 
+                color = "secondary"
+                onClick={this.connect} 
+                className={this.state.connected?"connected":"unconnected"}
+                aria-label = "connect"
+                variant="extended"
+                style = {styles}
+            >
+                <PowerSettingsNewIcon style={iconStyles} />
                 {this.state.connected?"Connected":"Connect to a Wallet"}
-            </button>
+            </Fab>
         );
     }
 }
