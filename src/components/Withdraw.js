@@ -3,7 +3,7 @@ import Message from "./Message";
 import {bigInt as snarkBigInt} from 'snarkjs';
 import tUtils from '../TornadoUtils';
 import MerkleTree from '../lib/MerkleTree';
-import buildGroth16 from 'websnark/src/groth16';
+import buildGroth16 from '../lib/groth16';
 import websnarkUtils from 'websnark/src/utils';
 import Spinner from "./Spinner";
 import { Grid, Button, TextField} from '@material-ui/core';

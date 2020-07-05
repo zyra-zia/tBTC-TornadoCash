@@ -128,7 +128,6 @@ class App extends React.Component {
                       currentAccount = {this.currentAccount} 
                       tokenContract = {this.tokenContract} 
                       tornadoContract = {this.getContractForDenomination} 
-                      setMessage = {this.setMessage}
                     />
                   </TabPanel>
                   <TabPanel value={this.state.tabValue} index={1} >
@@ -136,7 +135,6 @@ class App extends React.Component {
                       web3 = {this.web3}
                       currentAccount = {this.currentAccount}
                       tornadoContract = {this.getContractForDenomination} 
-                      setMessage = {this.setMessage}
                     />
                   </TabPanel>
                 </Fragment>

@@ -115,7 +115,7 @@ class MerkleTree {
         }
 
         async handle_index(level, element_index, sibling_index) {
-          if (level == 0) {
+          if (level === 0) {
             this.original_element = await this.storage.get_or_element(
               MerkleTree.index_to_key(this.prefix, level, element_index),
               this.zero_values[level],
@@ -126,7 +126,7 @@ class MerkleTree {
             this.zero_values[level],
           )
           let left, right
-          if (element_index % 2 == 0) {
+          if (element_index % 2 === 0) {
             left = this.current_element
             right = sibling
           } else {
@@ -171,7 +171,7 @@ class MerkleTree {
     let current_index = index
     for (let i = 0; i < this.n_levels; i++) {
       let sibling_index = current_index
-      if (current_index % 2 == 0) {
+      if (current_index % 2 === 0) {
         sibling_index += 1
       } else {
         sibling_index -= 1
