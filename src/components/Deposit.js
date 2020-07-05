@@ -18,7 +18,7 @@ class Deposit extends React.Component {
       working: false,
       note: "",
       showNote: false,
-      denomination: "0.01",
+      denomination: "0.001",
       currentContract: props.tornadoContract("0.01"),
       message: {
         text: "",
@@ -142,13 +142,13 @@ class Deposit extends React.Component {
                 <Grid container justify="center" >
                   <Grid item={true} xs={12} align="center">
                   <p style={{textAlign:'center'}}>
-                    Select tBtc amount to deposit
+                    Select tBTC amount to deposit
                   </p>
                     <FormControl component="fieldset">
                       <RadioGroup row aria-label="amount" name="amount" value={this.state.denomination} onChange={this.denominationChange}>
-                        <FormControlLabel value="0.01" control={<Radio />} label="0.01 tBtc" />
-                        <FormControlLabel value="0.1" control={<Radio />} label="0.1 tBtc" />
-                        <FormControlLabel value="1" control={<Radio />} label="1 tBtc" />
+                        <FormControlLabel value="0.001" control={<Radio />} label="0.001 tBTC" />
+                        <FormControlLabel value="0.01" control={<Radio />} label="0.01 tBTC" />
+                        <FormControlLabel value="0.1" control={<Radio />} label="0.1 tBTC" />
                       </RadioGroup>
                     </FormControl>
                   </Grid>

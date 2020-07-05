@@ -67,13 +67,13 @@ class App extends React.Component {
   getContractForDenomination(denomination){
     let contract;
     switch(denomination){
-      case "1":
+      case "0.1":
         contract = new this.web3.eth.Contract(this.Erc20Tornado.abi, constants.TORNADO_CONTRACT_ADDRESS_1);
         break;
-      case "0.1":
+      case "0.01":
         contract = new this.web3.eth.Contract(this.Erc20Tornado.abi, constants.TORNADO_CONTRACT_ADDRESS_01);
         break;
-      case "0.01":
+      case "0.001":
       default:
         contract = new this.web3.eth.Contract(this.Erc20Tornado.abi, constants.TORNADO_CONTRACT_ADDRESS_001);
     }
@@ -100,16 +100,18 @@ class App extends React.Component {
         <CssBaseline />
         <AppBar position="relative" style={{padding:'20px'}}>
           <Typography variant="h4" align="center">
-            tBtc + Tornado Cash
+            tBTC + Tornado Cash
           </Typography>
           <p style={{textAlign:'center'}}>
-            Private Bitcoin transactions using tBtc and Tornado Cash
+            Private Bitcoin transactions using tBTC and Tornado Cash
           </p>
           <ConnectButton setMessage = {this.setMessage} walletConnected = {this.walletConnected}/>
         </AppBar>
         <Grid container={true} justify="center" style={{padding: "0", margin:"0"}}>
           <Grid item={true} xs={12} align="center" style={{padding: "0", margin:"0"}}>
-            {this.web3 !== undefined &&
+            {this.web3 === undefined?
+              <p style={{marginTop:"50px"}}>Please connect to a wallet. You must have an ethereum wallet like MetaMask installed, to be able to use this app.</p>
+              :
               (
                 this.state.loading ?
                 <Spinner/>
