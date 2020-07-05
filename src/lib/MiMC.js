@@ -10,4 +10,5 @@ class MimcSpongeHasher {
   }
 }
 
-module.exports = MimcSpongeHasher
+//module.exports = MimcSpongeHasher
+export default MimcSpongeHasher;
